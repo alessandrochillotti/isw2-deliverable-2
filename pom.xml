@@ -10,7 +10,16 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
-  	<sonar.organization>alessandrochillotti</sonar.organization>
-  	<sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.organization>alessandrochillotti</sonar.organization>
+	<sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
+    
+    <!-- https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit -->
+    <dependencies>
+	<dependency>
+    		<groupId>org.eclipse.jgit</groupId>
+		<artifactId>org.eclipse.jgit</artifactId>
+		<version>5.13.0.202109080827-r</version>
+	</dependency>
+    </dependencies>
 </project>
