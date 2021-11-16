@@ -1,0 +1,2 @@
+Manifest-Version: 1.0
+Main-Class: it.uniroma2.alessandrochillotti.isw2.App
