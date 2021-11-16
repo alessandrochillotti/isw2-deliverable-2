@@ -6,7 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,8 +26,7 @@ public class JiraAnalyzer {
 	protected static HashMap<LocalDateTime, String> releaseNames;
 	protected static HashMap<LocalDateTime, String> releaseID;
 	protected static ArrayList<LocalDateTime> releases;
-	public static Integer numVersions;
-
+	
 	public static void main(String[] args) throws IOException, JSONException {
 
 		String projName = "QPID";
@@ -60,15 +59,12 @@ public class JiraAnalyzer {
 		});
 		if (releases.size() < 6)
 			return;
-		FileWriter fileWriter = null;
-		try {
-			fileWriter = null;
-			String outname = projName + "VersionInfo.csv";
-			// Name of CSV for output
-			fileWriter = new FileWriter(outname);
+		
+		String outname = projName + "VersionInfo.csv";
+		try (FileWriter fileWriter = new FileWriter(outname);){			
 			fileWriter.append("Index,Version ID,Version Name,Date");
 			fileWriter.append("\n");
-			numVersions = releases.size();
+			
 			for (i = 0; i < releases.size(); i++) {
 				Integer index = i + 1;
 				fileWriter.append(index.toString());
@@ -80,18 +76,9 @@ public class JiraAnalyzer {
 				fileWriter.append(releases.get(i).toString());
 				fileWriter.append("\n");
 			}
-
-		} catch (Exception e) {
+		} catch (IOException e) {
 			LOGGER.log(null, "Error in csv writer");
 			e.printStackTrace();
-		} finally {
-			try {
-				fileWriter.flush();
-				fileWriter.close();
-			} catch (IOException e) {
-				LOGGER.log(null, "Error while flushing/closing fileWriter !!!");
-				LOGGER.log(null, "context", e);
-			}
 		}
 	}
 
@@ -106,13 +93,13 @@ public class JiraAnalyzer {
 
 	public static JSONObject readJsonFromUrl(String url) throws IOException, JSONException {
 		InputStream is = new URL(url).openStream();
-		try {
-			BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
-			String jsonText = readAll(rd);
-			return new JSONObject(jsonText);
-		} finally {
-			is.close();
-		}
+		
+		BufferedReader rd = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+		String jsonText = readAll(rd);
+		
+		rd.close();
+		
+		return new JSONObject(jsonText);
 	}
 
 	private static String readAll(Reader rd) throws IOException {
