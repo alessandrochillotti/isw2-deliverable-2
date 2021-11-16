@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Logger;
 import java.util.Collections;
-import java.util.Comparator;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -50,13 +49,10 @@ public class JiraAnalyzer {
 				addRelease(versions.getJSONObject(i).get("releaseDate").toString(), name, id);
 			}
 		}
-		// order releases by date
-		Collections.sort(releases, new Comparator<LocalDateTime>() {
-			// @Override
-			public int compare(LocalDateTime o1, LocalDateTime o2) {
-				return o1.compareTo(o2);
-			}
-		});
+		
+		// In this line defines the order to sort the releases
+		Collections.sort(releases, (o1, o2) -> o1.compareTo(o2));
+
 		if (releases.size() < 6)
 			return;
 		
@@ -77,8 +73,7 @@ public class JiraAnalyzer {
 				fileWriter.append("\n");
 			}
 		} catch (IOException e) {
-			LOGGER.log(null, "Error in csv writer");
-			e.printStackTrace();
+			LOGGER.log(null, "Error in csv writer", e);
 		}
 	}
 
