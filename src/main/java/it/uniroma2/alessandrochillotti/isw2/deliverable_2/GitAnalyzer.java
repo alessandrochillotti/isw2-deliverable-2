@@ -19,7 +19,7 @@ public class GitAnalyzer {
 		try {
 			rc.getCommitID(rc.getGit(URL, System.getProperty("user.home")), STRING_TO_FOUND);
 		} catch (GitAPIException | IOException e) {
-			e.printStackTrace();
+			LOGGER.log(null, "context", e);
 		}
 	}
 	
