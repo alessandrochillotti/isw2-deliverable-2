@@ -9,7 +9,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 
 public class GitAnalyzer {
 
-	private static final String URL = "https://github.com/alessandrochillotti/helloworld-git-analysis.git";
+	private static final String URL = "https://github.com/apache/bookkeeper.git";
 	private static final String STRING_TO_FOUND = "Added";
 	private static final Logger LOGGER = Logger.getLogger("Commit ID");
 	private static final String SANDBOX_FOLDER = "git-analysis";
@@ -48,7 +48,7 @@ public class GitAnalyzer {
 		// Get log of commits
 		Iterable<RevCommit> log = git.log().call();
 
-		// Print all commit that containt the word STRING_TO_FOUND
+		// Print all commit that contain the word STRING_TO_FOUND
 		for (RevCommit element : log) {
 			String commentCommit = element.getFullMessage();
 			if (commentCommit.contains(stringToFound)) {

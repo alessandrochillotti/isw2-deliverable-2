@@ -21,24 +21,28 @@ import org.json.JSONArray;
 
 public class JiraAnalyzer {
 
-	private static final Logger LOGGER = Logger.getLogger("GitAnalyzer");
+	private static final Logger LOGGER = Logger.getLogger("JiraAnalyzer");
 	protected static HashMap<LocalDateTime, String> releaseNames;
 	protected static HashMap<LocalDateTime, String> releaseID;
 	protected static ArrayList<LocalDateTime> releases;
 	
 	public static void main(String[] args) throws IOException, JSONException {
 
-		String projName = "QPID";
-		// Fills the arraylist with releases dates and orders them
-		// Ignores releases with missing dates
-		releases = new ArrayList<>();
-		Integer i;
+		String projName = "BOOKKEEPER";
 		String url = "https://issues.apache.org/jira/rest/api/2/project/" + projName;
-		JSONObject json = readJsonFromUrl(url);
+		
+		JiraAnalyzer analyzer = new JiraAnalyzer();
+
+		JSONObject json = analyzer.readJsonFromUrl(url);
 		JSONArray versions = json.getJSONArray("versions");
+		
+		// The idea is to fill the ArrayList with releases dates and orders them (releases with missing dates are ignored)
+		releases = new ArrayList<>();
 		releaseNames = new HashMap<>();
 		releaseID = new HashMap<>();
-		for (i = 0; i < versions.length(); i++) {
+		
+		
+		for (int i = 0; i < versions.length(); i++) {
 			String name = "";
 			String id = "";
 			if (versions.getJSONObject(i).has("releaseDate")) {
@@ -46,7 +50,7 @@ public class JiraAnalyzer {
 					name = versions.getJSONObject(i).get("name").toString();
 				if (versions.getJSONObject(i).has("id"))
 					id = versions.getJSONObject(i).get("id").toString();
-				addRelease(versions.getJSONObject(i).get("releaseDate").toString(), name, id);
+				analyzer.addRelease(versions.getJSONObject(i).get("releaseDate").toString(), name, id);
 			}
 		}
 		
@@ -61,7 +65,7 @@ public class JiraAnalyzer {
 			fileWriter.append("Index,Version ID,Version Name,Date");
 			fileWriter.append("\n");
 			
-			for (i = 0; i < releases.size(); i++) {
+			for (int i = 0; i < releases.size(); i++) {
 				Integer index = i + 1;
 				fileWriter.append(index.toString());
 				fileWriter.append(",");
@@ -77,7 +81,7 @@ public class JiraAnalyzer {
 		}
 	}
 
-	public static void addRelease(String strDate, String name, String id) {
+	public void addRelease(String strDate, String name, String id) {
 		LocalDate date = LocalDate.parse(strDate);
 		LocalDateTime dateTime = date.atStartOfDay();
 		if (!releases.contains(dateTime))
@@ -86,7 +90,7 @@ public class JiraAnalyzer {
 		releaseID.put(dateTime, id);
 	}
 
-	public static JSONObject readJsonFromUrl(String url) throws IOException, JSONException {
+	public JSONObject readJsonFromUrl(String url) throws IOException, JSONException {
 		InputStream is = new URL(url).openStream();
 		
 		BufferedReader rd = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
@@ -97,7 +101,7 @@ public class JiraAnalyzer {
 		return new JSONObject(jsonText);
 	}
 
-	private static String readAll(Reader rd) throws IOException {
+	private String readAll(Reader rd) throws IOException {
 		StringBuilder sb = new StringBuilder();
 		int cp;
 		while ((cp = rd.read()) != -1) {
