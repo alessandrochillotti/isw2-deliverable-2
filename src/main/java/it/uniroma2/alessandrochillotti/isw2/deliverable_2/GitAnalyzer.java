@@ -5,9 +5,6 @@ import java.util.logging.Logger;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.api.errors.InvalidRemoteException;
-import org.eclipse.jgit.api.errors.NoHeadException;
-import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 public class GitAnalyzer {
@@ -17,12 +14,16 @@ public class GitAnalyzer {
 	private static final Logger LOGGER = Logger.getLogger("Commit ID");
 	private static final String SANDBOX_FOLDER = "git-analysis";
 	
-	public static void main(String[] args) throws IOException, InvalidRemoteException, TransportException, GitAPIException {
+	public static void main(String[] args) {
 		GitAnalyzer rc = new GitAnalyzer();
-		rc.getCommitID(rc.getGit(URL, System.getProperty("user.home")), STRING_TO_FOUND);
+		try {
+			rc.getCommitID(rc.getGit(URL, System.getProperty("user.home")), STRING_TO_FOUND);
+		} catch (GitAPIException | IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
-	public Git getGit(String url, String pathRoot) throws InvalidRemoteException, TransportException, GitAPIException, IOException {
+	public Git getGit(String url, String pathRoot) throws GitAPIException, IOException {
 		
 		// If SANDBOX_FOLDER don't exist in user path, then create it
 		new File(pathRoot, SANDBOX_FOLDER).mkdir();
@@ -42,7 +43,7 @@ public class GitAnalyzer {
 		return git;
 	}
 
-	public void getCommitID(Git git, String stringToFound) throws NoHeadException, GitAPIException {
+	public void getCommitID(Git git, String stringToFound) throws GitAPIException {
 
 		// Get log of commits
 		Iterable<RevCommit> log = git.log().call();
