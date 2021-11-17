@@ -1,5 +1,12 @@
 package it.uniroma2.alessandrochillotti.isw2.deliverable_2;
 
+/*
+ * 
+ * The JiraAnalyzer is a tool to retrieve the versions of a project from Jira platform.
+ * This software maintain an ArrayList of version of project.
+ * 
+ */
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,38 +16,33 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.io.FileWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.logging.Logger;
 import java.util.Collections;
+import java.util.List;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import it.uniroma2.alessandrochillotti.isw2.deliverable_2.utils.Version;
+
 import org.json.JSONArray;
 
 public class JiraAnalyzer {
 
 	private static final Logger LOGGER = Logger.getLogger("JiraAnalyzer");
-	protected static HashMap<LocalDateTime, String> releaseNames;
-	protected static HashMap<LocalDateTime, String> releaseID;
-	protected static ArrayList<LocalDateTime> releases;
 	
-	public static void main(String[] args) throws IOException, JSONException {
-
-		String projName = "BOOKKEEPER";
-		String url = "https://issues.apache.org/jira/rest/api/2/project/" + projName;
-		
+	private List<Version> outcome;
+	
+	public List<Version> retrieveVersions(String progName) throws IOException, JSONException {
 		JiraAnalyzer analyzer = new JiraAnalyzer();
-
+		
+		String url = "https://issues.apache.org/jira/rest/api/2/project/" + progName;
 		JSONObject json = analyzer.readJsonFromUrl(url);
 		JSONArray versions = json.getJSONArray("versions");
 		
-		// The idea is to fill the ArrayList with releases dates and orders them (releases with missing dates are ignored)
-		releases = new ArrayList<>();
-		releaseNames = new HashMap<>();
-		releaseID = new HashMap<>();
-		
+		outcome = new ArrayList<>();
 		
 		for (int i = 0; i < versions.length(); i++) {
 			String name = "";
@@ -55,39 +57,43 @@ public class JiraAnalyzer {
 		}
 		
 		// In this line defines the order to sort the releases
-		Collections.sort(releases, (o1, o2) -> o1.compareTo(o2));
-
-		if (releases.size() < 6)
-			return;
+		Collections.sort(outcome);
 		
-		String outname = projName + "VersionInfo.csv";
-		try (FileWriter fileWriter = new FileWriter(outname);){			
+		return outcome;
+	}
+
+	public void writeFile(String projName) {
+		String filename = projName + "VersionInfo.csv";
+		
+		try (FileWriter fileWriter = new FileWriter(filename);){	
 			fileWriter.append("Index,Version ID,Version Name,Date");
-			fileWriter.append("\n");
+			fileWriter.append("\n");		
 			
-			for (int i = 0; i < releases.size(); i++) {
+			for (int i = 0; i < outcome.size(); i++) {
 				Integer index = i + 1;
+				Version current = outcome.get(i);
+				
 				fileWriter.append(index.toString());
 				fileWriter.append(",");
-				fileWriter.append(releaseID.get(releases.get(i)));
+				fileWriter.append(current.getVersionID());
 				fileWriter.append(",");
-				fileWriter.append(releaseNames.get(releases.get(i)));
+				fileWriter.append(current.getVersionName());
 				fileWriter.append(",");
-				fileWriter.append(releases.get(i).toString());
+				fileWriter.append(current.getDateTime().toString());
 				fileWriter.append("\n");
 			}
 		} catch (IOException e) {
 			LOGGER.log(null, "Error in csv writer", e);
 		}
 	}
-
+	
 	public void addRelease(String strDate, String name, String id) {
-		LocalDate date = LocalDate.parse(strDate);
-		LocalDateTime dateTime = date.atStartOfDay();
-		if (!releases.contains(dateTime))
-			releases.add(dateTime);
-		releaseNames.put(dateTime, name);
-		releaseID.put(dateTime, id);
+		LocalDateTime dateTime = LocalDate.parse(strDate).atStartOfDay();
+		
+		Version incomer = new Version(id, name, dateTime);
+		if(!outcome.contains(incomer)) {
+			outcome.add(incomer);
+		}
 	}
 
 	public JSONObject readJsonFromUrl(String url) throws IOException, JSONException {
