@@ -5,20 +5,33 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.json.JSONException;
 
 import it.uniroma2.alessandrochillotti.isw2.deliverable_2.utils.Version;
 
 public class Analyzer {
 	
-	private static final Logger LOGGER = Logger.getLogger("Analyzer");
+	/* Parameters */
+	private static final String URL = "https://github.com/apache/bookkeeper.git";
+	private static final String STRING_TO_FOUND = "Added";
 	private static final String PROJ_NAME = "BOOKKEEPER";
+	
+	private static final Logger LOGGER = Logger.getLogger("Analyzer");
+	
 	
 	public static void main(String[] args) {
 		JiraAnalyzer jiraAnalyzer = new JiraAnalyzer();
-		GitAnalyzer gitAnalyzer = new GitAnalyzer();
-		
 		ArrayList<Version> versions = new ArrayList<>();
+		GitAnalyzer gitAnalyzer = null;
+		
+		// Try to instantiate GitAnalyzer
+		try {
+			gitAnalyzer = new GitAnalyzer(URL);
+		} catch (GitAPIException | IOException e) {
+			LOGGER.log(null, "GitAnalyzer creation exception", e);
+			System.exit(1);
+		}
 		
 		// Retrieve versions of Jira project
 		try {
@@ -33,6 +46,12 @@ public class Analyzer {
 			versions.remove(i);
 		}
 		
-		gitAnalyzer.printCommitID();
+		try {
+			gitAnalyzer.getCommitID(STRING_TO_FOUND);
+		} catch (GitAPIException e) {
+			LOGGER.log(null, "GitAnalyzer getCommitID exception", e);
+		}
+		
+		
 	}
 }

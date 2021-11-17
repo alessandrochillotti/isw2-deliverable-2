@@ -9,24 +9,19 @@ import org.eclipse.jgit.revwalk.RevCommit;
 
 public class GitAnalyzer {
 
-	private static final String URL = "https://github.com/apache/bookkeeper.git";
-	private static final String STRING_TO_FOUND = "Added";
 	private static final Logger LOGGER = Logger.getLogger("Commit ID");
 	private static final String SANDBOX_FOLDER = "repo-bookkeeper";
 	
-	public void printCommitID() {
-		try {
-			getCommitID(getGit(URL, System.getProperty("user.home")), STRING_TO_FOUND);
-		} catch (GitAPIException | IOException e) {
-			LOGGER.log(null, "Exception generated", e);
-		}
+	private Git handleGit;
+	
+	public GitAnalyzer(String url) throws GitAPIException, IOException {
+		this.handleGit = getGit(url);
 	}
 	
-	public Git getGit(String url, String pathRoot) throws GitAPIException, IOException {
-		
+	public Git getGit(String url) throws GitAPIException, IOException {
 		// If SANDBOX_FOLDER don't exist in user path, then create it
-		new File(pathRoot, SANDBOX_FOLDER).mkdir();
-		File dir = new File(pathRoot, SANDBOX_FOLDER);
+		new File(System.getProperty("user.home"), SANDBOX_FOLDER).mkdir();
+		File dir = new File(System.getProperty("user.home"), SANDBOX_FOLDER);
 		
 		Git git;
 
@@ -42,10 +37,9 @@ public class GitAnalyzer {
 		return git;
 	}
 
-	public void getCommitID(Git git, String stringToFound) throws GitAPIException {
-
+	public void getCommitID(String stringToFound) throws GitAPIException {
 		// Get log of commits
-		Iterable<RevCommit> log = git.log().call();
+		Iterable<RevCommit> log = handleGit.log().call();
 
 		// Print all commit that contain the word STRING_TO_FOUND
 		for (RevCommit element : log) {
