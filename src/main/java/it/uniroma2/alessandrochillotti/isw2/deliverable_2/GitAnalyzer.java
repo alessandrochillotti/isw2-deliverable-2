@@ -14,12 +14,12 @@ public class GitAnalyzer {
 	private static final Logger LOGGER = Logger.getLogger("Commit ID");
 	private static final String SANDBOX_FOLDER = "git-analysis";
 	
-	public static void main(String[] args) {
+	public void exMain() {
 		GitAnalyzer rc = new GitAnalyzer();
 		try {
 			rc.getCommitID(rc.getGit(URL, System.getProperty("user.home")), STRING_TO_FOUND);
 		} catch (GitAPIException | IOException e) {
-			LOGGER.log(null, "context", e);
+			LOGGER.log(null, "Exception generated", e);
 		}
 	}
 	
