@@ -52,7 +52,7 @@ public class JiraAnalyzer {
 					name = versions.getJSONObject(i).get("name").toString();
 				if (versions.getJSONObject(i).has("id"))
 					id = versions.getJSONObject(i).get("id").toString();
-				analyzer.addRelease(versions.getJSONObject(i).get("releaseDate").toString(), name, id);
+				analyzer.addRelease(outcome, versions.getJSONObject(i).get("releaseDate").toString(), name, id);
 			}
 		}
 		
@@ -87,12 +87,12 @@ public class JiraAnalyzer {
 		}
 	}
 	
-	public void addRelease(String strDate, String name, String id) {
+	public void addRelease(List<Version> sandList, String strDate, String name, String id) {
 		LocalDateTime dateTime = LocalDate.parse(strDate).atStartOfDay();
 		
 		Version incomer = new Version(id, name, dateTime);
-		if(!outcome.contains(incomer)) {
-			outcome.add(incomer);
+		if(!sandList.contains(incomer)) {
+			sandList.add(incomer);
 		}
 	}
 

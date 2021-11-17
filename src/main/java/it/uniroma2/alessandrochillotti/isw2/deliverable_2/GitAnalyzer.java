@@ -12,12 +12,11 @@ public class GitAnalyzer {
 	private static final String URL = "https://github.com/apache/bookkeeper.git";
 	private static final String STRING_TO_FOUND = "Added";
 	private static final Logger LOGGER = Logger.getLogger("Commit ID");
-	private static final String SANDBOX_FOLDER = "git-analysis";
+	private static final String SANDBOX_FOLDER = "repo-bookkeeper";
 	
-	public void exMain() {
-		GitAnalyzer rc = new GitAnalyzer();
+	public void printCommitID() {
 		try {
-			rc.getCommitID(rc.getGit(URL, System.getProperty("user.home")), STRING_TO_FOUND);
+			getCommitID(getGit(URL, System.getProperty("user.home")), STRING_TO_FOUND);
 		} catch (GitAPIException | IOException e) {
 			LOGGER.log(null, "Exception generated", e);
 		}
