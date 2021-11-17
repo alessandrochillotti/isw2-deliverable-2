@@ -14,7 +14,6 @@ public class Analyzer {
 	
 	/* Parameters */
 	private static final String URL = "https://github.com/apache/bookkeeper.git";
-	private static final String STRING_TO_FOUND = "Added";
 	private static final String PROJ_NAME = "BOOKKEEPER";
 	
 	private static final Logger LOGGER = Logger.getLogger("Analyzer");
@@ -46,12 +45,14 @@ public class Analyzer {
 			versions.remove(i);
 		}
 		
-		try {
-			gitAnalyzer.getCommitID(STRING_TO_FOUND);
-		} catch (GitAPIException e) {
-			LOGGER.log(null, "GitAnalyzer getCommitID exception", e);
+		// Work to Git log
+		for (int i = 0; i < versions.size()-1; i++) {
+			try {
+				gitAnalyzer.getCommitID(versions.get(i).getDateTime(), versions.get(i+1).getDateTime());
+			} catch (GitAPIException e) {
+				LOGGER.log(null, "GitAnalyzer getCommitID exception", e);
+			}
 		}
-		
 		
 	}
 }
