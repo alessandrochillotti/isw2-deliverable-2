@@ -47,12 +47,23 @@ public class Analyzer {
 			LOGGER.log(null, "Make header exception", e);
 		}
 		
+		// Get last commit for each release
+		for (int i = 0; i < versions.size(); i++) {
+			try {
+				Version current = versions.get(i);
+				current.setLastCommit(gitAnalyzer.getLastCommit(current.getBeginDate(), current.getEndDate()));
+			} catch (GitAPIException e) {
+				LOGGER.log(null, "Insert files version exception", e);
+			}
+		}
+		
 		// Fill dataset with name of files
 		for (int i = 0; i < versions.size(); i++) {
 			try {
 				Version current = versions.get(i);
-				datasetBuilder.insertFilesVersion(current.getVersionName(), gitAnalyzer.getFilesLastCommit(current.getBeginDate(), current.getEndDate()));
-			} catch (GitAPIException | IOException e) {
+				if (current.getLastCommit() != null)
+					datasetBuilder.insertFilesVersion(versions.get(i).getVersionName(), gitAnalyzer.getFilesCommit(current.getLastCommit()));
+			} catch (IOException e) {
 				LOGGER.log(null, "Insert files version exception", e);
 			}
 		}

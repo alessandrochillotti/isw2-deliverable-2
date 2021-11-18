@@ -4,7 +4,6 @@ import java.io.*;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
@@ -30,7 +29,7 @@ public class GitAnalyzer {
 		}
 	}
 
-	public Git getGit(String url, String projName) throws GitAPIException, IOException {
+	private Git getGit(String url, String projName) throws GitAPIException, IOException {
 		// If SANDBOX_FOLDER don't exist in user path, then create it
 		String folderName = "repo-"+projName.toLowerCase();
 		new File(System.getProperty("user.home"), folderName).mkdir();
@@ -50,27 +49,14 @@ public class GitAnalyzer {
 		return git;
 	}
 
-	public void getCommitID(String stringToFound) throws GitAPIException {
-		// Get log of commits
-		Iterable<RevCommit> log = handleGit.log().call();
-
-		// Print all commit that contain the word STRING_TO_FOUND
-		for (RevCommit element : log) {
-			String commentCommit = element.getFullMessage();
-			if (commentCommit.contains(stringToFound)) {
-				LOGGER.info(element.getName());
-			}
-		}
-	}
-
 	/**
-    * This method return the list of file that are present in a specific point of versioning, considering the last commit in this version. 
+    * This method return the last commit of version 
     *
     * @param	beginDate	the minimum date of commit to consider
     * @param	endDate		the maximum date of commit to consider
-    * @return				list of name file that are present
+    * @return				last commit of version
     */
-	public List<String> getFilesLastCommit(LocalDateTime beginDate, LocalDateTime endDate) throws GitAPIException {
+	public RevCommit getLastCommit(LocalDateTime beginDate, LocalDateTime endDate) throws GitAPIException {
 		boolean first = true;
 		// Get log of commits
 		Iterable<RevCommit> currentCommit = handleGit.log().call();
@@ -97,34 +83,35 @@ public class GitAnalyzer {
 				if (currAuthorDateTime.isAfter(lastAuthorDateTime)) {
 					lastCommit = element;
 				}
-			}	
+			}
 		}
-			
-		if (lastCommit != null) {
-			return affetctedFiles(lastCommit);
-		} else 
-			return Collections.emptyList();
+		
+		return lastCommit;
 	}
 	
-	private List<String> affetctedFiles(RevCommit commit) {
+	
+	/**
+    * This method return the list of file that are present in a specific point of versioning
+    *
+    * @param	commit	the commit to consider to see files
+    * @return 			list of name file that are present
+    */
+	public List<String> getFilesCommit(RevCommit commit) {
 		List<String> affectedFiles = new ArrayList<>();
-		
 		ObjectId treeId = commit.getTree().getId();
 		
 		try (TreeWalk treeWalk = new TreeWalk(handleGit.getRepository())) {
-			try {
-				treeWalk.reset(treeId);
-				while (treeWalk.next()) {
-					if (treeWalk.isSubtree()) {
-						treeWalk.enterSubtree();
-					} else {
-						if (treeWalk.getPathString().contains(".java"))
-							affectedFiles.add(treeWalk.getPathString());
-					}
+			treeWalk.reset(treeId);
+			while (treeWalk.next()) {
+				if (treeWalk.isSubtree()) {
+					treeWalk.enterSubtree();
+				} else {
+					if (treeWalk.getPathString().endsWith(".java")) 
+						affectedFiles.add(treeWalk.getPathString());
 				}
-			} catch (IOException e) {
-				LOGGER.log(null, "IOException", e);
 			}
+		} catch (IOException e) {
+			LOGGER.log(null, "Affected");
 		}
 		
 		return affectedFiles;
