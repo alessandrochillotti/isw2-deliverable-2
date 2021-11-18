@@ -18,25 +18,20 @@ public class Analyzer {
 	
 	private static final Logger LOGGER = Logger.getLogger("Analyzer");
 	
-	
 	public static void main(String[] args) {
-		JiraAnalyzer jiraAnalyzer = new JiraAnalyzer();
-		ArrayList<Version> versions = new ArrayList<>();
-		GitAnalyzer gitAnalyzer = null;
+		// Entities to analyze project
+		JiraAnalyzer jiraAnalyzer = new JiraAnalyzer(PROJ_NAME);
+		GitAnalyzer gitAnalyzer = new GitAnalyzer(URL, PROJ_NAME);
+		DatasetBuilder datasetBuilder = new DatasetBuilder(PROJ_NAME);
 		
-		// Try to instantiate GitAnalyzer
-		try {
-			gitAnalyzer = new GitAnalyzer(URL);
-		} catch (GitAPIException | IOException e) {
-			LOGGER.log(null, "GitAnalyzer creation exception", e);
-			System.exit(1);
-		}
+		// Information to store result
+		ArrayList<Version> versions = new ArrayList<>();
 		
 		// Retrieve versions of Jira project
 		try {
-			versions = (ArrayList<Version>) jiraAnalyzer.retrieveVersions(PROJ_NAME);
+			versions = (ArrayList<Version>) jiraAnalyzer.retrieveVersions();
 		} catch (JSONException | IOException e) {
-			LOGGER.log(null, "JiraAnalyzer exception", e);
+			LOGGER.log(null, "RetrieveVersions exception", e);
 		}
 		
 		// Discard the second half for snoring
@@ -45,14 +40,21 @@ public class Analyzer {
 			versions.remove(i);
 		}
 		
-		// Work to Git log
-		for (int i = 0; i < versions.size()-1; i++) {
-			try {
-				gitAnalyzer.getCommitID(versions.get(i).getDateTime(), versions.get(i+1).getDateTime());
-			} catch (GitAPIException e) {
-				LOGGER.log(null, "GitAnalyzer getCommitID exception", e);
-			}
+		// Creation of dataset
+		try {
+			datasetBuilder.makeHeader();
+		} catch (IOException e) {
+			LOGGER.log(null, "Make header exception", e);
 		}
 		
+		// Fill dataset with name of files
+		for (int i = 0; i < versions.size()-1; i++) {
+			try {
+				datasetBuilder.insertFilesVersion(versions.get(i).getVersionName(), gitAnalyzer.getFilesLastCommit(versions.get(i).getDateTime(), versions.get(i+1).getDateTime()));
+			} catch (GitAPIException | IOException e) {
+				LOGGER.log(null, "Insert files version exception", e);
+			}
+		}
 	}
+	
 }
