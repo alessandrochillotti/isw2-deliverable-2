@@ -75,20 +75,20 @@ public class GitAnalyzer {
 		// Get log of commits
 		Iterable<RevCommit> currentCommit = handleGit.log().call();
 		RevCommit lastCommit = null;
-		
+
 		// Take last commit in period [beginDate, endDate)
 		for (RevCommit element : currentCommit) {
-			if (first) {
-				lastCommit = element;
-				first = false;
-			}
-			
 			// Compute LocalDateTime current commit
 			PersonIdent currAuthorIdent = element.getAuthorIdent();
 			Date currAuthorDate = currAuthorIdent.getWhen();
 			LocalDateTime currAuthorDateTime = currAuthorDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
 			
 			if (currAuthorDateTime.isAfter(beginDate) && currAuthorDateTime.isBefore(endDate)) {
+				if (first) {
+					lastCommit = element;
+					first = false;
+				}
+				
 				// Compute LocalDateTime current last commit
 				PersonIdent lastAuthorIdent = lastCommit.getAuthorIdent();
 				Date lastAuthorDate = lastAuthorIdent.getWhen();
@@ -97,12 +97,12 @@ public class GitAnalyzer {
 				if (currAuthorDateTime.isAfter(lastAuthorDateTime)) {
 					lastCommit = element;
 				}
-			}
+			}	
 		}
-		
-		if (lastCommit != null) 
+			
+		if (lastCommit != null) {
 			return affetctedFiles(lastCommit);
-		else 
+		} else 
 			return Collections.emptyList();
 	}
 	
