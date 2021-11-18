@@ -62,6 +62,11 @@ public class JiraAnalyzer {
 		// In this line defines the order to sort the releases
 		Collections.sort(outcome);
 		
+		// Set end date for each version
+		for (int i = 0; i < outcome.size()-1; i++) {
+			outcome.get(i).setEndDate(outcome.get(i+1).getBeginDate());
+		}
+		
 		return outcome;
 	}
 
@@ -82,7 +87,7 @@ public class JiraAnalyzer {
 				fileWriter.append(",");
 				fileWriter.append(current.getVersionName());
 				fileWriter.append(",");
-				fileWriter.append(current.getDateTime().toString());
+				fileWriter.append(current.getBeginDate().toString());
 				fileWriter.append("\n");
 			}
 		} catch (IOException e) {

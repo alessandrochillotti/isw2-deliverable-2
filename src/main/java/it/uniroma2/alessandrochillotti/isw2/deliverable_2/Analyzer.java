@@ -48,9 +48,10 @@ public class Analyzer {
 		}
 		
 		// Fill dataset with name of files
-		for (int i = 0; i < versions.size()-1; i++) {
+		for (int i = 0; i < versions.size(); i++) {
 			try {
-				datasetBuilder.insertFilesVersion(versions.get(i).getVersionName(), gitAnalyzer.getFilesLastCommit(versions.get(i).getDateTime(), versions.get(i+1).getDateTime()));
+				Version current = versions.get(i);
+				datasetBuilder.insertFilesVersion(current.getVersionName(), gitAnalyzer.getFilesLastCommit(current.getBeginDate(), current.getEndDate()));
 			} catch (GitAPIException | IOException e) {
 				LOGGER.log(null, "Insert files version exception", e);
 			}

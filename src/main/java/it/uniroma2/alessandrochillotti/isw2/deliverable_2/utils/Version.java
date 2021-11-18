@@ -6,12 +6,13 @@ public class Version implements Comparable<Version> {
 	
 	private String versionID;
 	private String versionName;
-	private LocalDateTime date;
+	private LocalDateTime beginDate;
+	private LocalDateTime endDate;
 	
-	public Version(String versionID, String versionName, LocalDateTime date) {
+	public Version(String versionID, String versionName, LocalDateTime beginDate) {
 		this.versionID = versionID;
 		this.versionName = versionName;
-		this.date = date;
+		this.beginDate = beginDate;
 	}
 	
 	public String getVersionID() {
@@ -22,13 +23,21 @@ public class Version implements Comparable<Version> {
 		return versionName;
 	}
 	
-	public LocalDateTime getDateTime() {
-		return date;
+	public LocalDateTime getBeginDate() {
+		return beginDate;
+	}
+	
+	public void setEndDate(LocalDateTime endDate) {
+		this.endDate = endDate;
+	}
+	
+	public LocalDateTime getEndDate() {
+		return endDate;
 	}
 	
 	@Override
 	public int compareTo(Version object) {
-		return getDateTime().compareTo(object.getDateTime());
+		return getBeginDate().compareTo(object.getBeginDate());
 	}
 	
 	/* The following two overrides there are only for respecting contract */	
