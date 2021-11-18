@@ -33,13 +33,16 @@ public class JiraAnalyzer {
 
 	private static final Logger LOGGER = Logger.getLogger("JiraAnalyzer");
 	
+	private String project;
 	private List<Version> outcome;
 	
-	public List<Version> retrieveVersions(String progName) throws IOException, JSONException {
-		JiraAnalyzer analyzer = new JiraAnalyzer();
-		
-		String url = "https://issues.apache.org/jira/rest/api/2/project/" + progName;
-		JSONObject json = analyzer.readJsonFromUrl(url);
+	public JiraAnalyzer(String project) {
+		this.project = project;
+	}
+	
+	public List<Version> retrieveVersions() throws IOException, JSONException {
+		String url = "https://issues.apache.org/jira/rest/api/2/project/" + project;
+		JSONObject json = readJsonFromUrl(url);
 		JSONArray versions = json.getJSONArray("versions");
 		
 		outcome = new ArrayList<>();
@@ -52,7 +55,7 @@ public class JiraAnalyzer {
 					name = versions.getJSONObject(i).get("name").toString();
 				if (versions.getJSONObject(i).has("id"))
 					id = versions.getJSONObject(i).get("id").toString();
-				analyzer.addRelease(outcome, versions.getJSONObject(i).get("releaseDate").toString(), name, id);
+				addRelease(outcome, versions.getJSONObject(i).get("releaseDate").toString(), name, id);
 			}
 		}
 		
