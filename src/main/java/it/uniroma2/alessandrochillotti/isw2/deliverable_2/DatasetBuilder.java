@@ -29,5 +29,6 @@ public class DatasetBuilder {
 			handleFile.append(version+","+list.get(i)+", No");
 			handleFile.append("\n");
 		}
+		handleFile.flush();
 	}
 }
