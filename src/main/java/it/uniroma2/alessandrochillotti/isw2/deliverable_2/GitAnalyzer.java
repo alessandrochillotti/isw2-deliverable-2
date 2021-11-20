@@ -15,6 +15,8 @@ import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
+import it.uniroma2.alessandrochillotti.isw2.deliverable_2.utils.ClassFile;
+
 public class GitAnalyzer {
 
 	private static final Logger LOGGER = Logger.getLogger("Commit ID");
@@ -31,10 +33,10 @@ public class GitAnalyzer {
 
 	private Git getGit(String url, String projName) throws GitAPIException, IOException {
 		// If SANDBOX_FOLDER don't exist in user path, then create it
-		String folderName = "repo-"+projName.toLowerCase();
+		String folderName = "repo-" + projName.toLowerCase();
 		new File(System.getProperty("user.home"), folderName).mkdir();
 		File dir = new File(System.getProperty("user.home"), folderName);
-
+	
 		Git git;
 
 		// If the directory is not empty, then I refresh the directory
@@ -50,12 +52,12 @@ public class GitAnalyzer {
 	}
 
 	/**
-    * This method return the last commit of version 
-    *
-    * @param	beginDate	the minimum date of commit to consider
-    * @param	endDate		the maximum date of commit to consider
-    * @return				last commit of version
-    */
+	 * This method return the last commit of version
+	 *
+	 * @param beginDate the minimum date of commit to consider
+	 * @param endDate   the maximum date of commit to consider
+	 * @return last commit of version
+	 */
 	public RevCommit getLastCommit(LocalDateTime beginDate, LocalDateTime endDate) throws GitAPIException {
 		boolean first = true;
 		// Get log of commits
@@ -67,19 +69,21 @@ public class GitAnalyzer {
 			// Compute LocalDateTime current commit
 			PersonIdent currAuthorIdent = element.getAuthorIdent();
 			Date currAuthorDate = currAuthorIdent.getWhen();
-			LocalDateTime currAuthorDateTime = currAuthorDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-			
+			LocalDateTime currAuthorDateTime = currAuthorDate.toInstant().atZone(ZoneId.systemDefault())
+					.toLocalDateTime();
+
 			if (currAuthorDateTime.isAfter(beginDate) && currAuthorDateTime.isBefore(endDate)) {
 				if (first) {
 					lastCommit = element;
 					first = false;
 				}
-				
+
 				// Compute LocalDateTime current last commit
 				PersonIdent lastAuthorIdent = lastCommit.getAuthorIdent();
 				Date lastAuthorDate = lastAuthorIdent.getWhen();
-				LocalDateTime lastAuthorDateTime = lastAuthorDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-				
+				LocalDateTime lastAuthorDateTime = lastAuthorDate.toInstant().atZone(ZoneId.systemDefault())
+						.toLocalDateTime();
+
 				if (currAuthorDateTime.isAfter(lastAuthorDateTime)) {
 					lastCommit = element;
 				}
@@ -88,32 +92,35 @@ public class GitAnalyzer {
 		
 		return lastCommit;
 	}
-	
-	
+
 	/**
-    * This method return the list of file that are present in a specific point of versioning
-    *
-    * @param	commit	the commit to consider to see files
-    * @return 			list of name file that are present
-    */
-	public List<String> getFilesCommit(RevCommit commit) {
-		List<String> affectedFiles = new ArrayList<>();
+	 * This method return the list of file that are present in a specific point of
+	 * versioning
+	 *
+	 * @param commit the commit to consider to see files
+	 * @return list of name file that are present
+	 */
+	public List<ClassFile> getFilesCommit(RevCommit commit) {
+		List<ClassFile> affectedFiles = new ArrayList<>();
 		ObjectId treeId = commit.getTree().getId();
-		
+
 		try (TreeWalk treeWalk = new TreeWalk(handleGit.getRepository())) {
 			treeWalk.reset(treeId);
 			while (treeWalk.next()) {
 				if (treeWalk.isSubtree()) {
 					treeWalk.enterSubtree();
 				} else {
-					if (treeWalk.getPathString().endsWith(".java")) 
-						affectedFiles.add(treeWalk.getPathString());
+					if (treeWalk.getPathString().endsWith(".java")) {
+						ClassFile fileToAdd = new ClassFile(treeWalk.getPathString());
+						fileToAdd.addCommit(commit);
+						affectedFiles.add(fileToAdd);
+					}	
 				}
 			}
 		} catch (IOException e) {
 			LOGGER.log(null, "Affected");
 		}
-		
+
 		return affectedFiles;
 	}
 }

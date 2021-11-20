@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.logging.Logger;
 
+import it.uniroma2.alessandrochillotti.isw2.deliverable_2.utils.ClassFile;
+
 public class DatasetBuilder {
 
 	private static final Logger LOGGER = Logger.getLogger("DatasetBuilder");
@@ -24,9 +26,9 @@ public class DatasetBuilder {
 		handleFile.append("\n");
 	}
 
-	public void insertFilesVersion(String version, List<String> list) throws IOException {
+	public void insertFilesVersion(String version, List<ClassFile> list) throws IOException {
 		for (int i = 0; i < list.size(); i++) {
-			handleFile.append(version+","+list.get(i)+", No");
+			handleFile.append(version+","+list.get(i).getFullName() +", No");
 			handleFile.append("\n");
 		}
 		handleFile.flush();

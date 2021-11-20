@@ -1,6 +1,8 @@
 package it.uniroma2.alessandrochillotti.isw2.deliverable_2.utils;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.jgit.revwalk.RevCommit;
 
@@ -11,6 +13,7 @@ public class Version implements Comparable<Version> {
 	private LocalDateTime beginDate;
 	private LocalDateTime endDate;
 	private RevCommit lastCommit;
+	private ArrayList<ClassFile> files;
 	
 	public Version(String versionID, String versionName, LocalDateTime beginDate) {
 		this.versionID = versionID;
@@ -44,6 +47,14 @@ public class Version implements Comparable<Version> {
 	
 	public void setLastCommit(RevCommit lastCommit) {
 		this.lastCommit = lastCommit;
+	}
+	
+	public void setFiles(List<ClassFile> list) {
+		this.files = (ArrayList<ClassFile>) list;
+	}
+	
+	public List<ClassFile> getFiles() {
+		return files;
 	}
 	
 	@Override

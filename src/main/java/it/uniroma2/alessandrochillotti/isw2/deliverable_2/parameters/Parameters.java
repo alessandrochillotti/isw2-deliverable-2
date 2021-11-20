@@ -1,0 +1,13 @@
+package it.uniroma2.alessandrochillotti.isw2.deliverable_2.parameters;
+
+public class Parameters {
+	
+	private Parameters () {
+		throw new IllegalStateException("Parameters class must not be instantiated");
+	}
+	
+	public static final String PROJECT_NAME = "BOOKKEEPER";
+	public static final int WINDOW_SIZE = 50;
+	public static final String FILE_NAME = "record.csv";
+	public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+}
