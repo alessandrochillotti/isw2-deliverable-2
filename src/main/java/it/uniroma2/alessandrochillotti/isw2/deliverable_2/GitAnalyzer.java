@@ -10,13 +10,17 @@ import java.util.logging.Logger;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.diff.DiffFormatter;
+import org.eclipse.jgit.diff.RawTextComparator;
+import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
-
-import org.apache.maven.scm.ScmFile;
-import org.apache.maven.scm.provider.git.jgit.command.JGitUtils;
+import org.eclipse.jgit.util.io.DisabledOutputStream;
 
 import it.uniroma2.alessandrochillotti.isw2.deliverable_2.utils.ClassFile;
 import it.uniroma2.alessandrochillotti.isw2.deliverable_2.utils.Ticket;
@@ -149,15 +153,24 @@ public class GitAnalyzer {
 	 * @return			list of touched file
 	 * 
 	 * */
-	public List<ScmFile> filesInCommit(RevCommit commit) throws IOException{
-		List<ScmFile> javaFiles = new ArrayList<>();
+	public List<ClassFile> filesInCommit(RevCommit commit) throws RevisionSyntaxException, IOException {
+		ArrayList<ClassFile> files = new ArrayList<>();
 		
-		var files = JGitUtils.getFilesInCommit(handleGit.getRepository(), commit);
-		for(ScmFile file: files) {
-			if(file.getPath().endsWith(".java") && !javaFiles.contains(file))
-				javaFiles.add(file);
+		Repository repo = handleGit.getRepository();
+		try (RevWalk rw = new RevWalk(repo)) {
+			RevCommit parent = rw.parseCommit(commit.getParent(0).getId());
+			try (DiffFormatter df = new DiffFormatter(DisabledOutputStream.INSTANCE)) {
+				df.setRepository(repo);
+				df.setDiffComparator(RawTextComparator.DEFAULT);
+				df.setDetectRenames(true);
+				List<DiffEntry> diffs = df.scan(parent.getTree(), commit.getTree());
+				for (DiffEntry diff : diffs) {
+					if (diff.getNewPath().endsWith(".java"))
+						files.add(new ClassFile(diff.getNewPath()));
+				}
+			}
 		}
 		
-		return javaFiles;
+		return files;
 	}
 }
