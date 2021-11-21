@@ -20,7 +20,7 @@ public class Version implements Comparable<Version> {
 		this.versionName = versionName;
 		this.beginDate = beginDate;
 	}
-	
+
 	public String getVersionID() {
 		return versionID;
 	}

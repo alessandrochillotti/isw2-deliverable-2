@@ -15,7 +15,11 @@ import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
+import org.apache.maven.scm.ScmFile;
+import org.apache.maven.scm.provider.git.jgit.command.JGitUtils;
+
 import it.uniroma2.alessandrochillotti.isw2.deliverable_2.utils.ClassFile;
+import it.uniroma2.alessandrochillotti.isw2.deliverable_2.utils.Ticket;
 
 public class GitAnalyzer {
 
@@ -61,36 +65,45 @@ public class GitAnalyzer {
 	public RevCommit getLastCommit(LocalDateTime beginDate, LocalDateTime endDate) throws GitAPIException {
 		boolean first = true;
 		// Get log of commits
-		Iterable<RevCommit> currentCommit = handleGit.log().call();
+		Iterable<RevCommit> log = handleGit.log().call();
 		RevCommit lastCommit = null;
 
 		// Take last commit in period [beginDate, endDate)
-		for (RevCommit element : currentCommit) {
-			// Compute LocalDateTime current commit
-			PersonIdent currAuthorIdent = element.getAuthorIdent();
-			Date currAuthorDate = currAuthorIdent.getWhen();
-			LocalDateTime currAuthorDateTime = currAuthorDate.toInstant().atZone(ZoneId.systemDefault())
-					.toLocalDateTime();
+		for (RevCommit commit: log) {
+			LocalDateTime date = getDateCommit(commit);
 
-			if (currAuthorDateTime.isAfter(beginDate) && currAuthorDateTime.isBefore(endDate)) {
+			if (date.isAfter(beginDate) && date.isBefore(endDate)) {
 				if (first) {
-					lastCommit = element;
+					lastCommit = commit;
 					first = false;
 				}
 
-				// Compute LocalDateTime current last commit
-				PersonIdent lastAuthorIdent = lastCommit.getAuthorIdent();
-				Date lastAuthorDate = lastAuthorIdent.getWhen();
-				LocalDateTime lastAuthorDateTime = lastAuthorDate.toInstant().atZone(ZoneId.systemDefault())
-						.toLocalDateTime();
-
-				if (currAuthorDateTime.isAfter(lastAuthorDateTime)) {
-					lastCommit = element;
+				if (date.isAfter(getDateCommit(lastCommit))) {
+					lastCommit = commit;
 				}
 			}
 		}
 		
 		return lastCommit;
+	}
+	
+	/**
+	 * This method put commit in corresponding ticket
+	 *
+	 * @param tickets	list of ticket checked
+	 */
+	public void commitsInTicket(List<Ticket> tickets) throws GitAPIException {		
+		// Get log of commits
+		Iterable<RevCommit> log = handleGit.log().call();
+		
+		for (RevCommit commit : log) {
+			for (Ticket ticket : tickets) {
+				if (commit.getFullMessage().contains(ticket.getKey())) {
+					ticket.addCommit(commit);
+					break;
+				}
+			}
+		}
 	}
 
 	/**
@@ -122,5 +135,29 @@ public class GitAnalyzer {
 		}
 
 		return affectedFiles;
+	}
+	
+	public LocalDateTime getDateCommit(RevCommit commit) {
+		PersonIdent currAuthorIdent = commit.getAuthorIdent();
+		Date currAuthorDate = currAuthorIdent.getWhen();
+		return currAuthorDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+	}
+	
+	/** This method return the list of touched files in commit
+	 * 
+	 * @param	commit	considered commit
+	 * @return			list of touched file
+	 * 
+	 * */
+	public List<ScmFile> filesInCommit(RevCommit commit) throws IOException{
+		List<ScmFile> javaFiles = new ArrayList<>();
+		
+		var files = JGitUtils.getFilesInCommit(handleGit.getRepository(), commit);
+		for(ScmFile file: files) {
+			if(file.getPath().endsWith(".java") && !javaFiles.contains(file))
+				javaFiles.add(file);
+		}
+		
+		return javaFiles;
 	}
 }

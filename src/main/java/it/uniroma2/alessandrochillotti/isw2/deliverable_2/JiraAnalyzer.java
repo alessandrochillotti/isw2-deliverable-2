@@ -86,7 +86,7 @@ public class JiraAnalyzer {
 			j = i + Parameters.WINDOW_SIZE;
 			String url = "https://issues.apache.org/jira/rest/api/2/search?jql=project=%22" + Parameters.PROJECT_NAME
 					+ "%22AND%22issueType%22=%22Bug%22AND(%22status%22=%22closed%22OR"
-					+ "%22status%22=%22resolved%22)AND%22resolution%22=%22fixed%22&fields=key,resolutiondate,versions,created&startAt="
+					+ "%22status%22=%22resolved%22)AND%22resolution%22=%22fixed%22&fields=key,resolutiondate,versions,created,fixVersions&startAt="
 					+ i.toString() + "&maxResults=" + j.toString();
 			JSONObject json = jsonApi.readJsonFromUrl(url);
 			JSONArray issues = json.getJSONArray("issues");
