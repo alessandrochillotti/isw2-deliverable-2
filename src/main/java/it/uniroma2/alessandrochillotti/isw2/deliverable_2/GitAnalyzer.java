@@ -12,18 +12,26 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
+import org.eclipse.jgit.diff.Edit;
+import org.eclipse.jgit.diff.EditList;
 import org.eclipse.jgit.diff.RawTextComparator;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.treewalk.AbstractTreeIterator;
+import org.eclipse.jgit.treewalk.CanonicalTreeParser;
+import org.eclipse.jgit.treewalk.EmptyTreeIterator;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.util.io.DisabledOutputStream;
 
+import it.uniroma2.alessandrochillotti.isw2.deliverable_2.parameters.Parameters;
 import it.uniroma2.alessandrochillotti.isw2.deliverable_2.utils.ClassFile;
 import it.uniroma2.alessandrochillotti.isw2.deliverable_2.utils.Ticket;
+import it.uniroma2.alessandrochillotti.isw2.deliverable_2.utils.Version;
 
 public class GitAnalyzer {
 
@@ -60,35 +68,32 @@ public class GitAnalyzer {
 	}
 
 	/**
-	 * This method return the last commit of version
+	 * This method return the ordered list of commit of a specific version
 	 *
-	 * @param beginDate the minimum date of commit to consider
-	 * @param endDate   the maximum date of commit to consider
-	 * @return last commit of version
+	 * @param version the specific version
+	 * @return ordered list of commit
 	 */
-	public RevCommit getLastCommit(LocalDateTime beginDate, LocalDateTime endDate) throws GitAPIException {
-		boolean first = true;
+	public List<RevCommit> getCommits(Version version) throws GitAPIException {
 		// Get log of commits
 		Iterable<RevCommit> log = handleGit.log().call();
-		RevCommit lastCommit = null;
+		ArrayList<RevCommit> commits = new ArrayList<>();
+		
+		LocalDateTime beginDate = version.getBeginDate();
+		LocalDateTime endDate = version.getEndDate();
 
 		// Take last commit in period [beginDate, endDate)
 		for (RevCommit commit: log) {
 			LocalDateTime date = getDateCommit(commit);
-
-			if (date.isAfter(beginDate) && date.isBefore(endDate)) {
-				if (first) {
-					lastCommit = commit;
-					first = false;
-				}
-
-				if (date.isAfter(getDateCommit(lastCommit))) {
-					lastCommit = commit;
-				}
-			}
+			
+			if (version.getVersionName().equals("4.0.0") && date.isBefore(endDate) || date.isAfter(beginDate) && date.isBefore(endDate))
+				commits.add(commit);
+			
 		}
 		
-		return lastCommit;
+		// Order commits
+		commits.sort((c1, c2) -> getDateCommit(c1).compareTo(getDateCommit(c2)));
+		
+		return commits;
 	}
 	
 	/**
@@ -127,9 +132,8 @@ public class GitAnalyzer {
 				if (treeWalk.isSubtree()) {
 					treeWalk.enterSubtree();
 				} else {
-					if (treeWalk.getPathString().endsWith(".java")) {
+					if (treeWalk.getPathString().endsWith(Parameters.FILE_TYPE)) {
 						ClassFile fileToAdd = new ClassFile(treeWalk.getPathString());
-						fileToAdd.addCommit(commit);
 						affectedFiles.add(fileToAdd);
 					}	
 				}
@@ -139,6 +143,33 @@ public class GitAnalyzer {
 		}
 
 		return affectedFiles;
+	}
+	
+	public void getFiles(List<Version> versions) throws IOException {
+		for (Version version: versions) {
+			ObjectId treeId = version.getLastCommit().getTree().getId();
+
+			TreeWalk treeWalk = new TreeWalk(handleGit.getRepository());
+			treeWalk.reset(treeId);
+			
+			exploreTreeWalk(treeWalk);
+		}
+	}
+	
+	private void exploreTreeWalk(TreeWalk treeWalk) throws IOException {
+		List<ClassFile> files = new ArrayList<>();
+		
+		while (treeWalk.next()) {
+			if (treeWalk.isSubtree()) {
+				treeWalk.enterSubtree();
+			} else {
+				if (treeWalk.getPathString().endsWith(Parameters.FILE_TYPE)) {
+					ClassFile fileToAdd = new ClassFile(treeWalk.getPathString());
+					if (!files.contains(fileToAdd))
+						files.add(fileToAdd);
+				}	
+			}
+		}
 	}
 	
 	public LocalDateTime getDateCommit(RevCommit commit) {
@@ -165,12 +196,52 @@ public class GitAnalyzer {
 				df.setDetectRenames(true);
 				List<DiffEntry> diffs = df.scan(parent.getTree(), commit.getTree());
 				for (DiffEntry diff : diffs) {
-					if (diff.getNewPath().endsWith(".java"))
+					if (diff.getNewPath().endsWith(Parameters.FILE_TYPE)) {
 						files.add(new ClassFile(diff.getNewPath()));
+					}
 				}
 			}
 		}
 		
 		return files;
 	}
+	
+	 /** This method implements the git diff command
+	 *
+	 * @param oldCommit 	the old commit
+	 * @param newCommit 	the new commit
+	 * @param file			file to be analyzed
+	 */
+	public List<Edit> diff(RevCommit oldCommit, RevCommit newCommit, ClassFile file) throws IOException {
+		List<DiffEntry> diffList = null;
+		ArrayList<Edit> edits = new ArrayList<>();
+		
+		try (DiffFormatter formatter = new DiffFormatter(null)) {
+			formatter.setRepository(handleGit.getRepository());
+			
+			if (newCommit != null) {
+				diffList = formatter.scan(oldCommit.getTree(), newCommit.getTree());
+			} else {
+				ObjectReader reader = handleGit.getRepository().newObjectReader();
+				AbstractTreeIterator newTreeIter = new CanonicalTreeParser(null, reader, oldCommit.getTree());
+				AbstractTreeIterator oldTreeIter = new EmptyTreeIterator();
+				diffList = formatter.scan(oldTreeIter, newTreeIter);
+			}
+
+			for (DiffEntry diff : diffList) {
+				if (diff.toString().contains(file.getFullName())) {
+					formatter.setDetectRenames(true);
+					EditList editList = formatter.toFileHeader(diff).toEditList();
+					
+					for (Edit editElement : editList)
+						edits.add(editElement);
+				} else {
+					formatter.setDetectRenames(false);
+				}
+			}
+		}
+		
+		return edits;
+	}
+
 }

@@ -12,7 +12,7 @@ public class Version implements Comparable<Version> {
 	private String versionName;
 	private LocalDateTime beginDate;
 	private LocalDateTime endDate;
-	private RevCommit lastCommit;
+	private ArrayList<RevCommit> commits;
 	private ArrayList<ClassFile> files;
 	
 	public Version(String versionID, String versionName, LocalDateTime beginDate) {
@@ -41,12 +41,19 @@ public class Version implements Comparable<Version> {
 		return endDate;
 	}
 	
-	public RevCommit getLastCommit() {
-		return lastCommit;
+	public List<RevCommit> getCommits() {
+		return commits;
 	}
 	
-	public void setLastCommit(RevCommit lastCommit) {
-		this.lastCommit = lastCommit;
+	public RevCommit getLastCommit() {
+		if (commits.isEmpty()) 
+			return null;
+			
+		return commits.get(commits.size()-1);
+	}
+	
+	public void setCommits(List<RevCommit> commits) {
+		this.commits = (ArrayList<RevCommit>) commits;
 	}
 	
 	public void setFiles(List<ClassFile> list) {
@@ -55,6 +62,19 @@ public class Version implements Comparable<Version> {
 	
 	public List<ClassFile> getFiles() {
 		return files;
+	}
+	
+	public boolean containFile(ClassFile file) {
+		String nameTarget = file.getFullName();
+		
+		for (int i = 0; i < files.size(); i++) {
+			String name = files.get(i).getFullName();
+		
+			if (name.equals(nameTarget)) 
+				return true;
+		}
+		
+		return false;
 	}
 	
 	@Override
