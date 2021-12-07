@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 public class DatasetBuilder {
 
 	private static final Logger LOGGER = Logger.getLogger("DatasetBuilder");
-	public static final String HEADER = "Version,Name,Size,NR,NAuth,LOC added,MAX LOC added,AVG LOC added,Churn,MAX Churn,AVG Churn,Age\n";
+	public static final String HEADER = "Version,Name,Size,NR,NAuth,LOC added,MAX LOC added,AVG LOC added,Churn,MAX Churn,AVG Churn,Age,Buggy\n";
 
 	private FileWriter handleFile;
 

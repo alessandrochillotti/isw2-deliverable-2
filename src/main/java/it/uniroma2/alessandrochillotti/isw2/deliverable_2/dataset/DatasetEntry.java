@@ -20,6 +20,7 @@ public class DatasetEntry {
 	private int maxChurn;
 	private int maxAddLines;
 	private int age;
+	private boolean buggy;
 	private ArrayList<RevCommit> commits;
 	
 	public DatasetEntry(Version version, ClassFile file, int size) {
@@ -30,7 +31,12 @@ public class DatasetEntry {
 		this.delLines = 0;
 		this.maxChurn = 0;
 		this.maxAddLines = 0;
+		this.buggy = false;
 		commits = new ArrayList<>();
+	}
+	
+	public Version getVersion() {
+		return version;
 	}
 	
 	public ClassFile getFile() {
@@ -104,11 +110,22 @@ public class DatasetEntry {
 		return age;
 	}
 	
+	public void setBuggy(boolean buggy) {
+		this.buggy = buggy;
+	}
+	
+	public String getBuggy() {
+		if(buggy) 
+			return "Yes";
+		else
+			return "No";
+	}
+	
 	public String toCSV() {
-		return String.format("%s,%s,%d,%d,%d,%d,%d,%s,%d,%d,%s,%d%n", 
+		return String.format("%s,%s,%d,%d,%d,%d,%d,%s,%d,%d,%s,%d,%s%n", 
 				version.getVersionName(), file.getFullName(), getSize(), getNumberRevisions(), 
 				getNumberAuthors(), addLines, maxAddLines, String.format(Locale.US, "%.2f", getAvgAddLines()),
-				getChurn(), maxChurn, String.format(Locale.US, "%.2f", getAvgChurn()), getAge()
+				getChurn(), maxChurn, String.format(Locale.US, "%.2f", getAvgChurn()), getAge(), getBuggy()
 		);
 	}
 }

@@ -82,9 +82,9 @@ public class Version implements Comparable<Version> {
 		return getBeginDate().compareTo(object.getBeginDate());
 	}
 	
-	/* The following two overrides there are only for respecting contract */	
+	
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(Object version) {
 		return false;
 	}
 	

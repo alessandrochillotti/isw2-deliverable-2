@@ -12,15 +12,15 @@ public class Ticket {
 	private LocalDateTime resolutionDate;
 	private ArrayList<Version> affectedVersions;
 	private ArrayList<Version> fixVersions;
-	private ArrayList<RevCommit> commits; 
+	private ArrayList<ClassFile> touchedFiles;
 	
 	public Ticket(String key, LocalDateTime creationDate, LocalDateTime resolutionDate) {
 		this.key = key;
 		this.creationDate = creationDate;
 		this.resolutionDate = resolutionDate;
-		affectedVersions = new ArrayList<>();
-		fixVersions = new ArrayList<>();
-		commits = new ArrayList<>();
+		this.affectedVersions = new ArrayList<>();
+		this.fixVersions = new ArrayList<>();
+		this.touchedFiles = new ArrayList<>();
 	}
 
 	public String getKey() {
@@ -50,12 +50,41 @@ public class Ticket {
 	public List<Version> getFixVersion() {
 		return fixVersions;
 	}
-	
-	public void addCommit(RevCommit commit) {
-		commits.add(commit);
+	public void addTouchedFile(ClassFile file) {
+		touchedFiles.add(file);
 	}
 	
-	public List<RevCommit> getCommits() {
-		return commits;
+	public List<ClassFile> getTouchedFiles(){
+		return touchedFiles;
 	}
+	
+	public void addFilesTouched(List<ClassFile> files) {
+		if(touchedFiles == null) return;
+		
+		for(ClassFile newFile: files) {
+			boolean present = false;
+			
+			for(int i = 0; !present && i < touchedFiles.size(); i++) {
+				String file = files.get(i).getFullName();
+				
+				if(file.equals(newFile.getFullName())) present = true;
+			}
+			
+			if(!present) touchedFiles.add(newFile);
+		}
+	}
+	
+	@Override
+    public boolean equals(Object ticket){
+        if(ticket instanceof Ticket){
+            Ticket toCompare = (Ticket) ticket;
+            return ((Ticket) ticket).getKey().equals(toCompare.getKey());
+        }
+        return false;
+    }
+	
+	@Override
+    public int hashCode(){
+        return 1;
+    }
 }

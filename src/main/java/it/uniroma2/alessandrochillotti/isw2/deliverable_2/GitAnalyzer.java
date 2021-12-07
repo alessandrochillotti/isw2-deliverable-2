@@ -6,6 +6,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jgit.api.Git;
@@ -15,6 +16,9 @@ import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.diff.Edit;
 import org.eclipse.jgit.diff.EditList;
 import org.eclipse.jgit.diff.RawTextComparator;
+import org.eclipse.jgit.errors.CorruptObjectException;
+import org.eclipse.jgit.errors.IncorrectObjectTypeException;
+import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectReader;
@@ -43,7 +47,7 @@ public class GitAnalyzer {
 		try {
 			this.handleGit = getGit(url, projName);
 		} catch (GitAPIException | IOException e) {
-			LOGGER.log(null, "Error in instantiation phase", e);
+			LOGGER.log(Level.SEVERE, "Error in instantiation phase", e);
 		}
 	}
 
@@ -73,7 +77,7 @@ public class GitAnalyzer {
 	 * @param version the specific version
 	 * @return ordered list of commit
 	 */
-	public List<RevCommit> getCommits(Version version) throws GitAPIException {
+	public List<RevCommit> getCommits(Version version, boolean first) throws GitAPIException {
 		// Get log of commits
 		Iterable<RevCommit> log = handleGit.log().call();
 		ArrayList<RevCommit> commits = new ArrayList<>();
@@ -85,7 +89,7 @@ public class GitAnalyzer {
 		for (RevCommit commit: log) {
 			LocalDateTime date = getDateCommit(commit);
 			
-			if (version.getVersionName().equals("4.0.0") && date.isBefore(endDate) || date.isAfter(beginDate) && date.isBefore(endDate))
+			if (first && date.isBefore(endDate) || date.isAfter(beginDate) && date.isBefore(endDate))
 				commits.add(commit);
 			
 		}
@@ -100,15 +104,19 @@ public class GitAnalyzer {
 	 * This method put commit in corresponding ticket
 	 *
 	 * @param tickets	list of ticket checked
+	 * @throws IOException 
+	 * @throws CorruptObjectException 
+	 * @throws IncorrectObjectTypeException 
+	 * @throws  
 	 */
-	public void commitsInTicket(List<Ticket> tickets) throws GitAPIException {		
+	public void filesTouchedForTicket(List<Ticket> tickets) throws GitAPIException, IOException {		
 		// Get log of commits
 		Iterable<RevCommit> log = handleGit.log().call();
 		
 		for (RevCommit commit : log) {
-			for (Ticket ticket : tickets) {
+			for (Ticket ticket: tickets) {
 				if (commit.getFullMessage().contains(ticket.getKey())) {
-					ticket.addCommit(commit);
+					ticket.addFilesTouched(filesInCommit(commit));
 					break;
 				}
 			}
