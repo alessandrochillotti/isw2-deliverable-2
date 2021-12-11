@@ -18,6 +18,7 @@ import it.uniroma2.alessandrochillotti.isw2.deliverable_2.utils.Ticket;
 import it.uniroma2.alessandrochillotti.isw2.deliverable_2.utils.Version;
 
 public class JSONApi {
+	
 	public JSONObject readJsonFromUrl(String url) throws IOException, JSONException {
 		InputStream is = new URL(url).openStream();
 
@@ -53,29 +54,41 @@ public class JSONApi {
 		Ticket ticket = new Ticket(key, dateApi.getLocalDateTime(creationDate, format), dateApi.getLocalDateTime(resolutionDate, format));
 		
 		// Put info for Affected Version
+		int i = 0;
 		JSONArray affectedVersions = fields.getJSONArray("versions");
-		for (int i = 0; i < affectedVersions.length(); i++) {
+		while (i < affectedVersions.length()) {
 			JSONObject version = affectedVersions.getJSONObject(i);
 			
 			String id = version.get("id").toString();
 			String name = version.get("name").toString();
-			LocalDate date = dateApi.getLocalDate(version.get("releaseDate").toString(), "yyyy-MM-dd");
+			try {
+				LocalDate date = dateApi.getLocalDate(version.get("releaseDate").toString(), "yyyy-MM-dd");
+				ticket.addAffectedVersion(new Version(id, name, date.atStartOfDay()));
+			} catch(org.json.JSONException e) {
+				affectedVersions.remove(i);
+				i--;
+			}
 			
-			ticket.addAffectedVersion(new Version(id, name, date.atStartOfDay()));
+			i++;
 		}
 		
 		// Put info for Fixed Version
+		i = 0;
 		JSONArray fixedVersions = fields.getJSONArray("fixVersions");
-		for (int i = 0; i < fixedVersions.length(); i++) {
+		while (i < fixedVersions.length()) {
 			JSONObject version = fixedVersions.getJSONObject(i);
 			
-			if (version.getBoolean("released")) {
-				String id = version.get("id").toString();
-				String name = version.get("name").toString();
+			String id = version.get("id").toString();
+			String name = version.get("name").toString();
+			try {
 				LocalDate date = dateApi.getLocalDate(version.get("releaseDate").toString(), "yyyy-MM-dd");
-				
-				ticket.addAffectedVersion(new Version(id, name, date.atStartOfDay()));
+				ticket.addFixVersion(new Version(id, name, date.atStartOfDay()));
+			} catch(org.json.JSONException e) {
+				fixedVersions.remove(i);
+				i--;
 			}
+			
+			i++;
 		}
 		
 		return ticket;

@@ -6,7 +6,7 @@ public class Parameters {
 		throw new IllegalStateException("Parameters class must not be instantiated");
 	}
 	
-	public static final String PROJECT = "BOOKKEEPER";
+	public static final String PROJECT = "ZOOKEEPER";
 	public static final int WINDOW_SIZE = 50;
 	public static final String FILE_NAME = "record.csv";
 	public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";

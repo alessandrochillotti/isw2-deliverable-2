@@ -31,7 +31,7 @@ public class Analyzer {
 	private GitAnalyzer gitApi;
 	private DatasetBuilder datasetApi;
 
-	public Analyzer(String projName) {
+	public Analyzer(String projName) throws JSONException {
 		this.project = projName.toUpperCase();
 		this.jiraApi = new JiraAnalyzer(project);
 		this.gitApi = new GitAnalyzer(Parameters.makeUrl(project), project);
@@ -40,7 +40,7 @@ public class Analyzer {
 	}
 
 	public static void main(String[] args) {
-		Analyzer analyzer;
+		Analyzer analyzer = null;
 		ArrayList<Version> versions = null;
 		ArrayList<Ticket> bugTickets = null;
 		ArrayList<DatasetEntry> entries = null;
@@ -48,6 +48,9 @@ public class Analyzer {
 		// Select the project: BOOKKEEPER o ZOOKKEEPER
 		try (Scanner scanner = new Scanner(System.in)) {
 			analyzer = new Analyzer(Parameters.PROJECT);
+		} catch (JSONException e) {
+			LOGGER.log(Level.WARNING, "New analyzer exception", e);
+			System.exit(1);
 		}
 
 		// Start analysis
@@ -135,9 +138,12 @@ public class Analyzer {
 	public List<Ticket> getBugTickets() throws JSONException, IOException, GitAPIException {
 		// Create a basic version of ticket
 		ArrayList<Ticket> tickets = (ArrayList<Ticket>) jiraApi.retrieveBugTickets();
-
+		
 		// Put into each ticket its files	
 		gitApi.filesTouchedForTicket(tickets);
+		
+		// Apply proportion method
+		jiraApi.proportionMethod(tickets);
 
 		return tickets;
 	}

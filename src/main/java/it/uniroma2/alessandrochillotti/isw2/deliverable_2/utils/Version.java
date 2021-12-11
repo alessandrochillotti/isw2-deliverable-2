@@ -77,6 +77,10 @@ public class Version implements Comparable<Version> {
 		return false;
 	}
 	
+	public boolean isBefore(Version toCompare) {
+		return beginDate.isBefore(toCompare.getBeginDate());
+	}
+	
 	@Override
 	public int compareTo(Version object) {
 		return getBeginDate().compareTo(object.getBeginDate());
