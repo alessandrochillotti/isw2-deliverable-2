@@ -1,4 +1,4 @@
-package it.uniroma2.alessandrochillotti.isw2.deliverable_2;
+package it.uniroma2.alessandrochillotti.isw2.deliverable_2.analyzers;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;

@@ -1,10 +1,10 @@
-package it.uniroma2.alessandrochillotti.isw2.deliverable_2;
+package it.uniroma2.alessandrochillotti.isw2.deliverable_2.api;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class DateManager {
+public class DateApi {
 	
 	public LocalDateTime getLocalDateTime(String date, String format) {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);

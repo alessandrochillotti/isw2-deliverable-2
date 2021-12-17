@@ -6,7 +6,7 @@ public class Parameters {
 		throw new IllegalStateException("Parameters class must not be instantiated");
 	}
 	
-	public static final String PROJECT = "ZOOKEEPER";
+	public static final String PROJECT = "BOOKKEEPER";
 	public static final String DATASET_DIRECTORY = "./dataset/";
 	public static final String WEKA_RESULTS_DIRECTORY = "./weka-results/";
 	public static final int WINDOW_SIZE = 50;

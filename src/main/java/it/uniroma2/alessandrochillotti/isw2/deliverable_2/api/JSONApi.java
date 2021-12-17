@@ -13,7 +13,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import it.uniroma2.alessandrochillotti.isw2.deliverable_2.DateManager;
 import it.uniroma2.alessandrochillotti.isw2.deliverable_2.utils.Ticket;
 import it.uniroma2.alessandrochillotti.isw2.deliverable_2.utils.Version;
 
@@ -42,7 +41,7 @@ public class JSONApi {
 	}
 	
 	public Ticket makeTicket(JSONObject entry, String format) {
-		DateManager dateApi = new DateManager();
+		DateApi dateApi = new DateApi();
 		JSONObject fields = entry.getJSONObject("fields");
 		
 		// Create basic Ticket
