@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.logging.Logger;
 
+import it.uniroma2.alessandrochillotti.isw2.deliverable_2.parameters.Parameters;
+
 public class DatasetBuilder {
 
 	private static final Logger LOGGER = Logger.getLogger("DatasetBuilder");
@@ -14,7 +16,7 @@ public class DatasetBuilder {
 
 	public DatasetBuilder(String projName) {
 		try {
-			this.handleFile = new FileWriter(projName.toLowerCase() + "-dataset.csv");
+			this.handleFile = new FileWriter(String.format("%s%s%s", Parameters.DATASET_DIRECTORY, projName.toLowerCase(), "-dataset.csv"));
 		} catch (IOException e) {
 			LOGGER.log(null, "Error in instantiation phase", e);
 		}

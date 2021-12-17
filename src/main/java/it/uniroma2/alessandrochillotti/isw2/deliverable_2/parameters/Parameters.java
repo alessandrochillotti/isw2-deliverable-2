@@ -7,6 +7,8 @@ public class Parameters {
 	}
 	
 	public static final String PROJECT = "ZOOKEEPER";
+	public static final String DATASET_DIRECTORY = "./dataset/";
+	public static final String WEKA_RESULTS_DIRECTORY = "./weka-results/";
 	public static final int WINDOW_SIZE = 50;
 	public static final String FILE_NAME = "record.csv";
 	public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
