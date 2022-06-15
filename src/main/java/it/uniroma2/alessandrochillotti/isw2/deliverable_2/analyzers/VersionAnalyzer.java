@@ -47,7 +47,7 @@ public class VersionAnalyzer {
 			return versions.get(0);
 		
 		for (Version version: versions) {
-			if (ticket.getCreationDate().isAfter(version.getBeginDate()) && ticket.getCreationDate().isBefore(version.getEndDate()))
+			if (!ticket.getCreationDate().isBefore(version.getBeginDate()) && ticket.getCreationDate().isBefore(version.getEndDate()))
 				return version;
 		}
 		

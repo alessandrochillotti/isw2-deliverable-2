@@ -144,10 +144,9 @@ public class Analyzer {
 		
 		// Apply proportion method
 		jiraApi.proportionMethod(tickets);
-
+		
 		return tickets;
 	}
-	
 
 	/**
 	 * 
