@@ -11,7 +11,7 @@ public enum CostSensitive {
 		} else if (this.equals(SENSITIVE_THRESHOLD)) {
 			return "Sensitive threshold";
 		} else {
-			return "Ibk";
+			return "Sensitive learning";
 		}
 	}
 }

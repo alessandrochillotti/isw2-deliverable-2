@@ -46,10 +46,10 @@ public class Dataset {
 		testingSet.setClassIndex(testingSet.numAttributes()-1);
 
 		// Filter only data
-		int[] columns = {3,4,5,6,7,8,9,10,11,12};
+		int[] columns = {0,1};
 		Remove removeFilter = new Remove();
 		removeFilter.setAttributeIndicesArray(columns);
-		removeFilter.setInvertSelection(true);
+		removeFilter.setInvertSelection(false);
 		removeFilter.setInputFormat(trainingSet);
 		
 		trainingSet = Filter.useFilter(trainingSet, removeFilter);
