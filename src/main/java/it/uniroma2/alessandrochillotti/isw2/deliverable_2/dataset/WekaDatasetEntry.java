@@ -39,13 +39,13 @@ public class WekaDatasetEntry {
 		this.balancing = run.getData().getProfile().getSampling();
 		this.featureSelection = run.getData().getProfile().getSelection();
 		this.sensitivity = run.getData().getProfile().getSensitive();
-		this.truePositive = (int) evaluation.numTruePositives(0);
-		this.falsePositive = (int) evaluation.numFalsePositives(0);
-		this.trueNegative = (int) evaluation.numTrueNegatives(0);
-		this.falseNegative = (int) evaluation.numFalseNegatives(0);
-		this.precision = evaluation.precision(0);
-		this.recall = evaluation.recall(0);
-		this.auc = evaluation.areaUnderROC(0);
+		this.truePositive = (int) evaluation.numTruePositives(1);
+		this.falsePositive = (int) evaluation.numFalsePositives(1);
+		this.trueNegative = (int) evaluation.numTrueNegatives(1);
+		this.falseNegative = (int) evaluation.numFalseNegatives(1);
+		this.precision = evaluation.precision(1);
+		this.recall = evaluation.recall(1);
+		this.auc = evaluation.areaUnderROC(1);
 		this.kappa = evaluation.kappa();
 	}
 	

@@ -31,21 +31,22 @@ public class Run {
 			actualClassifier = new RandomForest();
 		}
 		
+		Evaluation evaluation;
+		CostSensitiveClassifier costSensitive = new CostSensitiveClassifier();
+		CostMatrix costMatrix = getCostMatrix(10.0, 1.0);
+		costSensitive.setClassifier(actualClassifier);
+		costSensitive.setCostMatrix(costMatrix);
+
 		if (!profile.getSensitive().equals(CostSensitive.NO_COST_SENSITIVE)) {
-			CostMatrix costMatrix = getCostMatrix(10.0, 1.0);
-			CostSensitiveClassifier costSensitive = new CostSensitiveClassifier();
-			
-			costSensitive.setClassifier(actualClassifier);
-			costSensitive.setCostMatrix(costMatrix);
-			
 			costSensitive.setMinimizeExpectedCost(profile.getSensitive().equals(CostSensitive.SENSITIVE_THRESHOLD));
+			costSensitive.buildClassifier(data.getTrainingSet());
+			evaluation = new Evaluation(data.getTestingSet(), costSensitive.getCostMatrix());
+			evaluation.evaluateModel(costSensitive, data.getTestingSet());
+		} else {
+			actualClassifier.buildClassifier(data.getTrainingSet());
+			evaluation = new Evaluation(data.getTestingSet());
+			evaluation.evaluateModel(actualClassifier, data.getTestingSet());
 		}
-		
-		actualClassifier.buildClassifier(data.getTrainingSet());
-				
-		Evaluation evaluation = new Evaluation(data.getTestingSet());
-				
-		evaluation.evaluateModel(actualClassifier, data.getTestingSet());
 		
 		return evaluation;
 	}
@@ -54,8 +55,8 @@ public class Run {
 		CostMatrix costMatrix = new CostMatrix(2);
 		
 		costMatrix.setCell(0, 0, 0.0);
-		costMatrix.setCell(0, 1, falseNegativeWeigth);
-		costMatrix.setCell(1, 0, falsePositiveWeigth);
+		costMatrix.setCell(0, 1, falsePositiveWeigth);
+		costMatrix.setCell(1, 0, falseNegativeWeigth);
 		costMatrix.setCell(1, 1, 0.0);
 		
 		return costMatrix;
