@@ -112,7 +112,7 @@ public class JiraAnalyzer {
 			// Iterate through each bug ticket
 			for (; i < total && i < j; i++) {
 				Ticket current = jsonApi.makeTicket(issues.getJSONObject(i%Parameters.WINDOW_SIZE), Parameters.DATE_FORMAT);
-				if (!current.getAffectedVersions().isEmpty() && !current.getFixVersion().isEmpty())
+				if (!current.getFixVersion().isEmpty())
 					bugTickets.add(current);
 			}
 		} while (i < total);

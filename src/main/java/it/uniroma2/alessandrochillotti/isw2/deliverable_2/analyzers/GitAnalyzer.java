@@ -90,7 +90,6 @@ public class GitAnalyzer {
 			
 			if (first && date.isBefore(endDate) || date.isAfter(beginDate) && date.isBefore(endDate))
 				commits.add(commit);
-			
 		}
 		
 		// Order commits
@@ -116,7 +115,6 @@ public class GitAnalyzer {
 			for (Ticket ticket: tickets) {
 				if (commit.getFullMessage().contains(ticket.getKey())) {
 					ticket.addFilesTouched(filesInCommit(commit));
-					break;
 				}
 			}
 		}
